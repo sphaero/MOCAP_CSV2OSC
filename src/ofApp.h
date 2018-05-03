@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxBlui.h"
 #include "ofxOsc.h"
 #include "CSVloader.h" // include our ThreadedObject class.
 #include "MOCAP_Marker.h"
@@ -46,6 +47,25 @@ class ofApp : public ofBaseApp{
         void printOSCmessage(ofxOscMessage m);
     
         void deactivateInputs();
+
+        // UI
+        ofxBlui blui;
+        int contentCol;
+        int loadFileButton;
+        int addButton;
+        int saveButton;
+        int setFPSButton;
+        int playPauseRewindRadio;
+        int newNameTextbox;
+        int newIPTextbox;
+        int fpsTextbox;
+
+        void setupBlui();
+        void loadFileButtonPressed(int item, UIevent event);
+        void addButtonPressed(int item, UIevent event);
+        void saveButtonPressed(int item, UIevent event);
+        void setFPSButtonPressed(int item, UIevent event);
+
     
         CSVloader csvloader;
         /// \brief A local count that is only accessed in the main thread

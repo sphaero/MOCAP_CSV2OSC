@@ -53,12 +53,77 @@ void ofApp::setup(){
     rewindBTN.setup(ofRectangle(InterfaceX+130, InterfaceY+160, 60, 20), "rewind", 12, ofColor(0,0,0), ofColor(255,255,255));
     setFPSBTN.setup(ofRectangle(InterfaceX+100, InterfaceY+220, 70, 20), "set FPS", 12, ofColor(0,0,0), ofColor(255,255,255));
     fps.setup(ofRectangle(InterfaceX, InterfaceY+220, 60, 20), 10, "30","FPS");
-    
+
+    setupBlui();
+
     // get data
     setupData();
     
     //default framerate
     ofSetFrameRate(60);
+}
+
+void ofApp::setupBlui()
+{
+    uiBeginLayout();
+    // construct the root panel
+    int root = uiItem(); //just a invisible full window container (like a div)
+    ofLogNotice() << root;
+    uiSetSize(root, ofGetWidth(), ofGetHeight());
+    uiSetEvents(root, UI_SCROLL|UI_BUTTON0_DOWN);
+    uiSetLayout(root, UI_HFILL|UI_TOP);
+    uiSetBox(root, UI_COLUMN);
+    // construct the content container
+    int content = blui.panel();//uiItem();
+    uiSetLayout(content, UI_RIGHT);
+    uiSetSize(content, 250, ofGetHeight());
+    uiInsert(root, content);
+    // construct the content column
+    contentCol = blui.column();
+    uiInsert(content, contentCol);
+    uiSetMargins(contentCol, 10,10,10,10);
+    uiSetLayout(contentCol, UI_TOP|UI_HFILL);
+    // add widgets
+    loadFileButton = blui.button(BND_ICON_FILESEL, "Load CSV file", this, &ofApp::loadFileButtonPressed);
+    blui.column_append(contentCol, loadFileButton);
+    ofLogNotice() << uiGetHandle(loadFileButton);
+    /*
+    // feedback text of csv file
+    blui.column_append(contentCol, blui.textbox("CSV feedback", 1024));
+    // progress bar of csv parsing
+    blui.column_append(contentCol, blui.slider("progress", &fFrameNum));
+    // framenumber counter
+    blui.column_append(contentCol, blui.label(BND_ICON_CAMERA_DATA, "Framenumber: 0"));
+    // FrameRate counter
+    blui.column_append(contentCol, blui.label(BND_ICON_ANIM, "FrameRate: 60"));
+    // fps textentry | setFPS button
+    int h = blui.column_append(contentCol, blui.hbox());
+    blui.hgroup_append(h, blui.textbox("60", 4));
+    int b = blui.hgroup_append(h, blui.button(BND_ICON_CAMERA_DATA, "set FPS", this, &ofApp::setFPSButtonPressed));
+    ofLogNotice() << uiGetHandle(loadFileButton);
+    ofLogNotice() << uiGetHandle(b);
+    // New User label (or client)
+    blui.column_append(contentCol, blui.label(BND_ICON_NEW, "New Client"));
+    // textfield | client name label
+    blui.column_append(contentCol, blui.textbox("client name", 32));
+    // textfield | client ip label
+    blui.column_append(contentCol, blui.textbox("client IP", 15));
+    // textfield | client port label
+    blui.column_append(contentCol, blui.textbox("client Port", 5));
+    addButton = blui.button(BND_ICON_MESH_MONKEY, "Add client", this, &ofApp::addButtonPressed);
+    blui.column_append(contentCol, addButton);
+    */
+    // save setup button
+    saveButton = blui.button(BND_ICON_SAVE_AS, "Save setup", this, &ofApp::saveButtonPressed);
+    blui.column_append(contentCol, saveButton);
+
+    /*
+    setFPSButton;
+    playPauseRewindRadio;
+    newNameTextbox;
+    newIPTextbox;
+    fpsTextbox;*/
+    uiEndLayout();
 }
 
 //--------------------------------------------------------------
@@ -97,6 +162,7 @@ void ofApp::setupData()
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    blui.update();
     mainAppsCount++;
     
     // This is fired when the CSV file is loaded
@@ -223,6 +289,7 @@ void ofApp::draw(){
     ofSetColor(255);
     ofSetBackgroundColor(40);
     
+    blui.draw();
     // for visual feedback of file loading
     csvloader.draw();
     
@@ -557,7 +624,8 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    //blui.update();//uiProcess(int(ofGetElapsedTimeMillis()));
+    //setupBlui();
 }
 
 //--------------------------------------------------------------
@@ -568,4 +636,30 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+
+// UI methods
+void ofApp::loadFileButtonPressed(int item, UIevent event)
+{
+    ofLogNotice() << "load file";
+    loadAFile();
+}
+
+void ofApp::addButtonPressed(int item, UIevent event)
+{
+    // TODO check for valid data?
+    addClient(clients.size(), newIP.getText(), ofToInt(newPort.getText()), newName.getText(), false, false, false, true, false);
+}
+
+void ofApp::saveButtonPressed(int item, UIevent event)
+{
+    ofLogNotice() << "saveData:" << item << ":" << uiGetHandle(item);
+    saveData();
+}
+
+void ofApp::setFPSButtonPressed(int item, UIevent event)
+{
+    ofLogNotice() << "setFPS";
+    frameRate = ofToInt(fps.getText());
+    frameTime = 1.0f / frameRate;
 }
